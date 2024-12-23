@@ -66,3 +66,36 @@ marco = Estudiante('Marco', 'Quimica')
 
 marco.saludar() # Salida: Hola, soy Marco
 marco.estudiar() # Salida: Marco esta estudiando Quimica
+
+
+
+#EJEMPLO 4:
+#POLIMORFISMO
+
+class Animal:
+    def hablar(self):
+        pass
+
+class Perro(Animal):
+    def hablar(self):
+        print('Guau!')
+
+class Gato(Animal):
+    def hablar(self):
+        print('Miau!')
+
+animales = [Perro(), Gato()]
+
+for animal in animales:
+    print(animal.hablar()) # Salida: Guau! \n Miau!
+
+
+#Existen metodos especiales(__init__,__str__,__len__,__add__,__sub__,__mul__,__truediv__,__floordiv__,__mod__,__pow__,__eq__,__ne__,__lt__,__gt__,__le__,__ge__)
+#__init__ : Constructor de la clase
+#__str__ : Devuelve una representación en forma de cadena del objeto
+#__len__ : Devuelve la longitud del objeto
+#__add__ : Suma de objetos
+#__sub__ : Resta de objetos
+#__mul__ : Multiplicación de objetos
+#__getitem__ : Acceso a elementos mediante índices
+#__setitem__ : Modificación de elementos mediante índices
