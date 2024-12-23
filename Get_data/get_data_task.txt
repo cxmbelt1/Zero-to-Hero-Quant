@@ -1,1 +1,3 @@
-Get data by either reading from a csv, if it doesn't exist handle the error and write the csv lates, or with an api connection plot the candlestick chart with plotly
+1Get data by either reading from a csv, if it doesn't exist handle the error and write the csv lates, or with an api connection DONE
+
+2plot the candlestick chart with plotly DONE
