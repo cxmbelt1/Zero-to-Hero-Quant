@@ -1,0 +1,2 @@
+1 Use the get_data.py code to get data and then calculate indicators from the data.
+2 Add a moving average cross strategy with signals, RSI, and bolligner bands
