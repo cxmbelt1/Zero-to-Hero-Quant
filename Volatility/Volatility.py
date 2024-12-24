@@ -158,4 +158,5 @@ if __name__ == '__main__':
         data = add_moving_average_strategy(data)
         data = calculate_indicators(data)
         data = calculate_volatility(data)
-        plot_with_strategy(data,ticker)
+        print(data.head())
+        #plot_with_strategy(data,ticker)
