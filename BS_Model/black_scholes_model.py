@@ -28,7 +28,6 @@ def calculate_volatility(data):
     data["log_returns"] = np.log(data["Close"]/data["Close"].shift(1))
 
     data["Rolling_Std"] = data["log_returns"].rolling(window=20).std()
-    data["EWMA_Std"] = data["log_returns"].ewm(span=20).std()
     data["Annualized_Vol"] = data["Rolling_Std"] * np.sqrt(252)
     
     data =data.dropna()
@@ -112,7 +111,7 @@ def plot_with_options(data,ticker):
 
 if __name__ == '__main__':
     
-    tickers = ['AAPL']
+    tickers = ['F']
     start_date = '2023-01-01'
     end_date = '2023-12-31'
 
