@@ -33,47 +33,63 @@ def calculate_volatility(data):
     data =data.dropna()
     return data
 
-def black_scholes(S, K, T, r, sigma, option_type='call'):
-    d1 = (np.log(S/K) + (r + 0.5*sigma**2)*T) / (sigma*np.sqrt(T))
-    d2 = d1 - sigma*np.sqrt(T)
+def binomial_option_price(S, K, T, r, sigma, n, option_type="call"):
 
-    if option_type == 'call':
-        return S*norm.cdf(d1) - K * np.exp(-r*T) * norm.cdf(d2)
-    elif option_type == 'put':
-        return K * np.exp(-r*T) * norm.cdf(-d2) - S*norm.cdf(-d1)
-    else:
-        return "Invalid contract type"
+    dt = T / n  # Length of time step
+    u = np.exp(sigma * np.sqrt(dt))  # Up factor
+    d = 1 / u  # Down factor
+    p = (np.exp(r * dt) - d) / (u - d)  # Risk-neutral up probability
 
-def calculate_option_price(data, risk_free_rate=0.03,days_till_expiration=30):
+    # Initialize the option values at maturity (final step)
+    option_prices = np.zeros(n + 1)
+    for i in range(n + 1):
+        if option_type == "call":
+            option_prices[i] = max(S * u**i * d**(n - i) - K, 0)  # Call payoff
+        elif option_type == "put":
+            option_prices[i] = max(K - S * u**i * d**(n - i), 0)  # Put payoff
+
+    # Step back through the tree to calculate the option price
+    for j in range(n - 1, -1, -1):
+        for i in range(j + 1):
+            option_prices[i] = np.exp(-r * dt) * (p * option_prices[i + 1] + (1 - p) * option_prices[i])
+
+    return option_prices[0]
+
+def calculate_option_price_binomial(data, risk_free_rate=0.03, days_to_expiration=30, n=100):
+    T = days_to_expiration / 252
     
-    T = days_till_expiration/252
     data = data.dropna().copy()
-
-    #call price column
-    data.loc[:, "Call_Price"] = data.apply(
-        lambda row: black_scholes(
-        S = row["Close"],
-        K = row["Close"]+1,
-        T = T,
-        r = risk_free_rate,
-        sigma=row["Annualized_Vol"],
-        option_type='call'
-        ), axis=1
+    
+    # Calculating Call option prices using the binomial model
+    data.loc[:, 'Call_Price'] = data.apply(
+        lambda row: binomial_option_price(
+            S=row['Close'],
+            K=row['Close'] + 1,
+            T=T,
+            r=risk_free_rate,
+            sigma=row['Annualized_Vol'],
+            n=n,
+            option_type="call"
+        ),
+        axis=1
     )
     
-    #put price column
-    data.loc[:, "Put_Price"] = data.apply(
-        lambda row: black_scholes(
-        S = row["Close"],
-        K = row["Close"]-1,
-        T = T,
-        r = risk_free_rate,
-        sigma=row["Annualized_Vol"],
-        option_type='put'
-        ), axis=1
+    # Calculating Put option prices using the binomial model
+    data.loc[:, 'Put_Price'] = data.apply(
+        lambda row: binomial_option_price(
+            S=row['Close'],
+            K=row['Close'] - 1,
+            T=T,
+            r=risk_free_rate,
+            sigma=row['Annualized_Vol'],
+            n=n,
+            option_type="put"
+        ),
+        axis=1
     )
-
+    
     return data
+
 
 def plot_with_options(data,ticker):
 
@@ -118,6 +134,6 @@ if __name__ == '__main__':
     stock_data = get_stock_data(tickers=tickers,start=start_date,end=end_date)
     for ticker,data in stock_data.items():
         data = calculate_volatility(data)
-        data = calculate_option_price(data)
+        data = calculate_option_price_binomial(data, risk_free_rate=0.03, days_to_expiration=5)
         
         plot_with_options(data,ticker)
